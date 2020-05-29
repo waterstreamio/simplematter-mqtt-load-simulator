@@ -48,7 +48,7 @@ variable "mqtt_server" {
 }
 
 variable "mqtt_loadsim_version" {
-  default = "0.0.2-SNAPSHOT"
+  default = "0.0.2"
 }
 
 variable "node_count" {

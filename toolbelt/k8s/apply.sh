@@ -57,7 +57,7 @@ spec:
         - name: dockerhub-mqttd-readonly
       containers:
         - name: mqtt-load-simulator
-          image: simplematter/simplematter-mqtt-load-simulator:0.0.2-SNAPSHOT
+          image: simplematter/simplematter-mqtt-load-simulator:$MQTTD_LOADSIM_VERSION
           imagePullPolicy: Always
           resources:
             requests:

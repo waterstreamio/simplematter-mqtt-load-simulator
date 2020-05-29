@@ -17,13 +17,10 @@ dockerhub_password = "<dockerhub password>"
 #############     MQTT Load   #############
 ###########################################
 
+mqtt_loadsim_version="0.0.2"
+#mqtt_loadsim_version="0.0.3-SNAPSHOT"
 
 mqtt_server = "<mqttd_host:mqttd_port>"
-#examples
-#sm42-2
-#mqtt_server = "94.130.13.210:11883"
-#sm52-3
-#mqtt_server = "144.76.140.217:11883"
 
 node_count = 3
 clients_per_node = 1000
@@ -36,3 +33,5 @@ message_max_size = 600
 
 connection_timeout_seconds = 60
 keep_alive_seconds = 180
+
+preemptible_nodes = true
