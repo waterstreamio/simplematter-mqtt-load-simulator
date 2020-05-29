@@ -1,2 +1,3 @@
-# simplematter-mqtt-load-simulator
-Simulate MQTT clients activity
+# mqtt-load-simulator
+
+Simulate load on MQTT broker

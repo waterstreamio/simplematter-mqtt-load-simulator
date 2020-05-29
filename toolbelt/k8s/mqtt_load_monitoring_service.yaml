@@ -1,0 +1,18 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: mqtt-load-simulator-monitoring
+  namespace: mqttload
+  labels:
+    project: mqtt-load-simulator
+    app: mqtt-load-simulator-monitoring
+spec:
+  selector:
+    project: mqtt-load-simulator
+    app: mqtt-load-simulator
+  ports:
+    - name: http-metrics
+      protocol: TCP
+      port: 1884
+      targetPort: 1884
+  type: ClusterIP

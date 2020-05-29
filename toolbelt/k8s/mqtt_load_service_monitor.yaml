@@ -1,0 +1,27 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: mqtt-load-simulator-monitoring
+  namespace: mqttload
+  labels:
+    project: mqtt-load-simulator
+    #To reuse Confluent Prometheus
+    release: prom
+spec:
+  jobLabel: mqtt_load_simulator_monitoring
+  selector:
+    matchLabels:
+      app: mqtt-load-simulator-monitoring
+  namespaceSelector:
+    matchNames:
+      - mqttload
+  endpoints:
+    - port: http-metrics
+      # comment following lines to use the pod IP instead of its name as instance:
+      relabelings:
+        - sourceLabels: [__meta_kubernetes_pod_name]
+          separator: ;
+          regex: (.*)
+          targetLabel: instance
+          replacement: $1
+          action: replace
