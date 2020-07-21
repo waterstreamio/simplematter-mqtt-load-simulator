@@ -57,8 +57,13 @@
       "targets": [
         {
           "expr": "sum(mqtt_load_clients_current)",
-          "legendFormat": "Current Clients",
+          "legendFormat": "Clients",
           "refId": "A"
+        },
+        {
+          "expr": "sum(mqtt_load_clients_connected_current)",
+          "legendFormat": "Connected clients",
+          "refId": "B"
         }
       ],
       "thresholds": [],
@@ -139,6 +144,10 @@
         {
           "alias": "Current Subscriptions",
           "yaxis": 2
+        },
+        {
+          "alias": "Current subscriptions offline",
+          "yaxis": 2
         }
       ],
       "spaceLength": 10,
@@ -159,6 +168,11 @@
           "expr": "sum(mqtt_load_unsubscribe_sent)",
           "legendFormat": "Unsubscribe Sent",
           "refId": "C"
+        },
+        {
+          "expr": "sum(mqtt_load_subscriptions_disconnected_current)",
+          "legendFormat": "Current subscriptions offline",
+          "refId": "D"
         }
       ],
       "thresholds": [],
@@ -356,6 +370,91 @@
       "timeRegions": [],
       "timeShift": null,
       "title": "Publish Received",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 16
+      },
+      "id": 11,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "mqtt_load_clients_connected_current",
+          "legendFormat": "Connected clients on {{instance}}",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Connected clients by instance",
       "tooltip": {
         "shared": true,
         "sort": 0,
