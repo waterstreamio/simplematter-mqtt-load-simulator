@@ -32,7 +32,9 @@ class SimulatedClient(
         val j = Job(parentJob)
 
         j.invokeOnCompletion {
+            stopping = true
             if (mqttClient != null && mqttClient.isConnected) mqttClient.disconnect()
+            MqttMonitoringCounters.subscriptionsCurrent.dec(subscriptions.size.toDouble())
             stopped = true
         }
         j
@@ -40,12 +42,14 @@ class SimulatedClient(
 
     override val coroutineContext = Dispatchers.Default + job
 
+    private var stopping = false
+
     private var stopped = false
 
     fun isStopped(): Boolean = stopped
 
     private val options = {
-        val o = MqttClientOptions().setClientId(clientId).setCleanSession(true).setKeepAliveTimeSeconds(config.mqtt.keepAliveSeconds)
+        val o = MqttClientOptions().setClientId(clientId).setCleanSession(!config.load.persistentSession).setKeepAliveTimeSeconds(config.mqtt.keepAliveSeconds)
         o.setConnectTimeout(config.mqtt.connectionTimeoutSeconds * 1000)
         o
     }()
@@ -54,39 +58,45 @@ class SimulatedClient(
 
     private val subscriptions = mutableSetOf<String>()
 
-
-    fun start() {
+    /**
+     * Checks that mqttClient is connected. If not - tries to connect it
+     */
+    private fun startConnectionCheckLoop() {
         launch {
-            suspendCancellableCoroutine<MqttClient> { continuation ->
-                MqttMonitoringCounters.connectSent.inc()
-                mqttClient.connect(config.mqtt.serverParsed.port, config.mqtt.serverParsed.host, { result ->
-                    if (result.failed()) {
-                        continuation.resumeWithException(result.cause())
-                        MqttMonitoringCounters.connectFailures.inc()
-                    } else {
-                        log.debug("Client $clientId connected to ${config.mqtt.server}")
-                        continuation.resume(mqttClient)
-                        MqttMonitoringCounters.connectSuccess.inc()
-                        MqttMonitoringCounters.clientsCurrent.inc()
+            var backOffInterval = config.load.clientStepInterval
+            while (!stopping) {
+                if(!mqttClient.isConnected) {
+                    log.debug("Client $clientId not connected, trying to connect it to ${config.mqtt.server}...")
+                    suspendCancellableCoroutine<Unit> { continuation ->
+                        MqttMonitoringCounters.connectSent.inc()
+                        mqttClient.connect(config.mqtt.serverParsed.port, config.mqtt.serverParsed.host, { result ->
+                            if (result.failed()) {
+                                backOffInterval = backOffInterval * 2
+                                log.info("Client $clientId failed to connect to ${config.mqtt.server}, increasing backOffInterval to ${backOffInterval}")
+                                continuation.resume(Unit)
+                                MqttMonitoringCounters.connectFailures.inc()
+                            } else {
+                                backOffInterval = config.load.clientStepInterval
+                                log.debug("Client $clientId connected to ${config.mqtt.server}")
+                                continuation.resume(Unit)
+                                MqttMonitoringCounters.connectSuccess.inc()
+                                MqttMonitoringCounters.clientsConnectedCurrent.inc()
+                                MqttMonitoringCounters.subscriptionsDisconnectedCurrent.dec(subscriptions.size.toDouble())
+                            }
+                        })
                     }
-                })
+                }
+                delay(backOffInterval)
             }
+        }
+    }
 
-            mqttClient.publishHandler {
-                stats.messageRecieved()
-                MqttMonitoringCounters.publishReceived.inc()
-            }.closeHandler {
-                log.info("Client connection closed")
-                job.cancel()
-                MqttMonitoringCounters.clientsCurrent.dec()
-                MqttMonitoringCounters.disconnectsTotal.inc()
-                MqttMonitoringCounters.subscriptionsCurrent.dec(subscriptions.size.toDouble())
-            }
-
-            while (!job.isCompleted) {
+    private fun startActionLoop() {
+        launch {
+            while (!stopping) {
                 val action = nextAction()
 
-                if (!rampUpComplete.isComplete && !config.load.actionsDuringRampUp) {
+                if (!mqttClient.isConnected || !rampUpComplete.isComplete && !config.load.actionsDuringRampUp) {
                     //noop
                 } else if (action == ClientAction.PUBLISH && topics.isNotEmpty()) {
                     sendRandomMessage()
@@ -98,6 +108,24 @@ class SimulatedClient(
                 delay(config.load.clientStepInterval)
             }
         }
+    }
+
+    fun start() {
+        MqttMonitoringCounters.clientsCurrent.inc()
+
+        startConnectionCheckLoop()
+
+        mqttClient.publishHandler {
+            stats.messageRecieved()
+            MqttMonitoringCounters.publishReceived.inc()
+        }.closeHandler {
+            log.info("Client $clientId connection closed")
+            MqttMonitoringCounters.clientsConnectedCurrent.dec()
+            MqttMonitoringCounters.disconnectsTotal.inc()
+            MqttMonitoringCounters.subscriptionsDisconnectedCurrent.inc(subscriptions.size.toDouble())
+        }
+
+        startActionLoop()
     }
 
     private fun sendRandomMessage() {
@@ -150,6 +178,7 @@ class SimulatedClient(
     }
 
     fun stop() {
+        stopping = true
         MqttMonitoringCounters.disconnectsIntentional.inc()
         job.cancel()
     }

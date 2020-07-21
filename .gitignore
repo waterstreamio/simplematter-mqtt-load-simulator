@@ -19,3 +19,4 @@ account.json
 
 *.tfstate
 *.tfstate.backup
+*.tfstate.lock.info

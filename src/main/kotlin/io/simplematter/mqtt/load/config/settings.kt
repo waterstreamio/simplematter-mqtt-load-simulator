@@ -34,7 +34,8 @@ data class LoadConfig(
         val clientStepInterval: Long,
         val statsInterval: Long,
         val rampUpSeconds: Int,
-        val actionsDuringRampUp: Boolean
+        val actionsDuringRampUp: Boolean,
+        val persistentSession: Boolean
 ) {
     val rampUpMillis = rampUpSeconds * 1000L
 }
