@@ -35,3 +35,4 @@ connection_timeout_seconds = 60
 keep_alive_seconds = 180
 
 preemptible_nodes = true
+persistent_session = false

@@ -75,6 +75,10 @@ variable "actions_during_ramp_up" {
   default = "false"
 }
 
+variable "persistent_session" {
+  default = "false"
+}
+
 variable "simulation_step_interval_ms" {
   default = 2000
 }
