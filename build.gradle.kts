@@ -1,7 +1,6 @@
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 
 group = "io.simplematter"
-version = "0.0.1-SNAPSHOT"
 
 val vertxVersion by extra("3.8.5")
 val kotlinTestVersion by extra("3.2.1")
