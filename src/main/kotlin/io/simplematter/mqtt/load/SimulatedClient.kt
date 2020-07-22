@@ -34,6 +34,7 @@ class SimulatedClient(
         j.invokeOnCompletion {
             stopping = true
             if (mqttClient != null && mqttClient.isConnected) mqttClient.disconnect()
+            MqttMonitoringCounters.clientsCurrent.dec()
             MqttMonitoringCounters.subscriptionsCurrent.dec(subscriptions.size.toDouble())
             stopped = true
         }
