@@ -17,8 +17,7 @@ dockerhub_password = "<dockerhub password>"
 #############     MQTT Load   #############
 ###########################################
 
-mqtt_loadsim_version="0.0.3"
-#mqtt_loadsim_version="0.0.4-SNAPSHOT"
+mqtt_loadsim_version="0.0.4"
 
 mqtt_server = "<mqttd_host:mqttd_port>"
 
