@@ -58,7 +58,7 @@ cp config-examples/config.auto.tfvars.example ./config.auto.tfvars
 Default credentials are "admin/admin"
 6. When done - run `toolbelt/terraform_gcp/destroy.sh` to stop it
 
-# Run on Kubernetes
+## Run on Kubernetes
 
 Pre-requisistes:
 - Kubernetes cluster
