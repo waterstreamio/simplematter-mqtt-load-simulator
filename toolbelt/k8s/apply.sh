@@ -8,8 +8,8 @@ PROJECT_DIR=$SCRIPT_DIR/..
 
 kubectl apply -f ${SCRIPT_DIR}/mqtt_load_namespace.yaml
 
-kubectl create secret docker-registry dockerhub-mqttd-readonly -n mqttload --docker-server=index.docker.io --docker-username=$DOCKERHUB_USERNAME --docker-password=$DOCKERHUB_PASSWORD
-kubectl label secret dockerhub-mqttd-readonly project=mqtt-load-simulator -n mqttload
+#kubectl create secret docker-registry dockerhub-mqttd-readonly -n mqttload --docker-server=index.docker.io --docker-username=$DOCKERHUB_USERNAME --docker-password=$DOCKERHUB_PASSWORD
+#kubectl label secret dockerhub-mqttd-readonly project=mqtt-load-simulator -n mqttload
 
 
 cat << EOF | eval kubectl apply -f -

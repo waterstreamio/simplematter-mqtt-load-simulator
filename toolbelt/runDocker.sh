@@ -3,8 +3,10 @@ set -e
 
 SCRIPT_DIR=`realpath $(dirname "$0")`
 
+#IMAGE_NAME=simplematter-mqtt-load-simulator
+IMAGE_NAME=simplematter/simplematter-mqtt-load-simulator:0.0.4
 CONTAINER_NAME=simplematter-mqtt-load-simulator
-echo Starting $CONTAINER_NAME
+echo Starting $CONTAINER_NAME from $IMAGE_NAME
 
 #Specity your broker URL
 #MQTT_LOAD_SERVER=localhost:1883
@@ -86,5 +88,5 @@ docker run $INTERACTIVITY $CLEANUP $JMX_OPTIONS $DEBUG_OPTIONS \
      -e MQTT_LOAD_KEEP_ALIVE_SECONDS=$MQTT_LOAD_KEEP_ALIVE_SECONDS \
      -e MQTT_LOAD_MONITORING_PORT=$MQTT_LOAD_MONITORING_PORT \
      --network host \
-     --name $CONTAINER_NAME $CONTAINER_NAME
+     --name $CONTAINER_NAME $IMAGE_NAME
 

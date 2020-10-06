@@ -5,13 +5,6 @@ project = "<YOUR-GCP-PROJECT>"
 region = "<YOUR-GCP-REGION>"
 zone =  "<YOUR-GCP-ZONE>"
 
-###########################################
-#############     DockerHub   #############
-###########################################
-
-dockerhub_username = "<dockerhub usernam>"
-dockerhub_password = "<dockerhub password>"
-
 
 ###########################################
 #############     MQTT Load   #############

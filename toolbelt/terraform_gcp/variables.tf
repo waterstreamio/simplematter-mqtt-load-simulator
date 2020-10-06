@@ -96,15 +96,3 @@ variable "keep_alive_seconds" {
 }
 
 
-###########################################
-#############     DockerHub   #############
-###########################################
-
-variable "dockerhub_username" {
-  type = string
-}
-
-variable "dockerhub_password" {
-  type = string
-}
-

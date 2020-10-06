@@ -148,8 +148,6 @@ runcmd:
   - [curl, "http://metadata.google.internal/computeMetadata/v1/instance/attributes/run-mqtt-loadsim-sh", -H, "Metadata-Flavor: Google", -o, runMqttLoadsim.sh]
   - echo scripts download done >> mqttload_start.log
   - sleep 10
-  - sudo -u mqttload docker login -u ${var.dockerhub_username} -p ${var.dockerhub_password}
-  - echo docker login done >> mqttload_start.log
   - sudo -u mqttload sh runMqttLoadsim.sh
   - echo init done >>  mqttload_start.log
 EOF
