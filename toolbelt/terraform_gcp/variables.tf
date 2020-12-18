@@ -95,4 +95,7 @@ variable "keep_alive_seconds" {
   default = 180
 }
 
+variable "message_qos" {
+  default = 0
+}
 

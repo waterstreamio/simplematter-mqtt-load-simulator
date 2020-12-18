@@ -128,6 +128,7 @@ docker run -d  \
     -e MQTT_LOAD_KEEP_ALIVE_SECONDS=${var.keep_alive_seconds} \
     -e MQTT_LOAD_MONITORING_PORT=1884 \
     -e MQTT_LOAD_PERSISTENT_SESSION=${var.persistent_session} \
+    -e MQTT_LOAD_PUBLISH_QOS=${var.message_qos} \
     -p 1884:1884 \
     --name mqtt-load-simulator \
     simplematter/simplematter-mqtt-load-simulator:${var.mqtt_loadsim_version}
