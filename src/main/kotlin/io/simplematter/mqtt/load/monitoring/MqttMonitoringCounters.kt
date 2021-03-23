@@ -27,7 +27,13 @@ object MqttMonitoringCounters {
 
     val connectFailures = Counter.build("mqtt_load_connect_failures", "Number of failed connects").register()
 
+    val connectPending = Gauge.build("mqtt_load_connect_pending", "Number of pending connects").register()
+
     val disconnectsTotal = Counter.build("mqtt_load_disconnects_total", "Number of total disconnects").register()
 
     val disconnectsIntentional = Counter.build("mqtt_load_disconnects_intentional", "Number of intentional disconnects - initiated by load simulator").register()
+
+    val connectSuccessDuration = Counter.build("mqtt_load_connect_success_duration", "Time spent waiting for successful connections").register()
+
+    val connectFailDuration = Counter.build("mqtt_load_connect_fail_duration", "Time spent waiting for failed connections").register()
 }

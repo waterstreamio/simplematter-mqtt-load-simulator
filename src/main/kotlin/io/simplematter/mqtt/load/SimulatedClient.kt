@@ -11,6 +11,7 @@ import io.vertx.mqtt.MqttClientOptions
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
 import java.lang.StringBuilder
+import java.util.concurrent.TimeoutException
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.random.Random
@@ -50,7 +51,8 @@ class SimulatedClient(
     fun isStopped(): Boolean = stopped
 
     private val options = {
-        val o = MqttClientOptions().setClientId(clientId).setCleanSession(!config.load.persistentSession).setKeepAliveTimeSeconds(config.mqtt.keepAliveSeconds)
+        val o = MqttClientOptions().setClientId(clientId).setCleanSession(!config.load.persistentSession).setKeepAliveInterval(config.mqtt.keepAliveSeconds)
+        o.setReconnectAttempts(0)
         o.setConnectTimeout(config.mqtt.connectionTimeoutSeconds * 1000)
         o
     }()
@@ -66,26 +68,43 @@ class SimulatedClient(
         launch {
             var backOffInterval = config.load.clientStepInterval
             while (!stopping) {
-                if(!mqttClient.isConnected) {
-                    log.debug("Client $clientId not connected, trying to connect it to ${config.mqtt.server}...")
-                    suspendCancellableCoroutine<Unit> { continuation ->
-                        MqttMonitoringCounters.connectSent.inc()
-                        mqttClient.connect(config.mqtt.serverParsed.port, config.mqtt.serverParsed.host, { result ->
-                            if (result.failed()) {
-                                backOffInterval = backOffInterval * 2
-                                log.info("Client $clientId failed to connect to ${config.mqtt.server}, increasing backOffInterval to ${backOffInterval}")
-                                continuation.resume(Unit)
-                                MqttMonitoringCounters.connectFailures.inc()
-                            } else {
-                                backOffInterval = config.load.clientStepInterval
-                                log.debug("Client $clientId connected to ${config.mqtt.server}")
-                                continuation.resume(Unit)
-                                MqttMonitoringCounters.connectSuccess.inc()
-                                MqttMonitoringCounters.clientsConnectedCurrent.inc()
-                                MqttMonitoringCounters.subscriptionsDisconnectedCurrent.dec(subscriptions.size.toDouble())
+                try {
+                    if (!mqttClient.isConnected) {
+                        log.info("Client $clientId not connected, trying to connect it to ${config.mqtt.server}...")
+                        suspendCancellableCoroutine<Unit> { continuation ->
+                            MqttMonitoringCounters.connectSent.inc()
+                            val connectStartTimestamp = System.currentTimeMillis()
+                            MqttMonitoringCounters.connectPending.inc()
+                            launch {
+                                delay(config.mqtt.connectionTimeoutSeconds * 1000L * 2)
+                                if(continuation.isActive) {
+                                    continuation.cancel(TimeoutException("MQTT client didn't complete connection for ${2 * config.mqtt.connectionTimeoutSeconds} s"))
+                                }
                             }
-                        })
+                            mqttClient.connect(config.mqtt.serverParsed.port, config.mqtt.serverParsed.host, { result ->
+                                MqttMonitoringCounters.connectPending.dec()
+                                if (result.failed()) {
+                                    val now = System.currentTimeMillis()
+                                    backOffInterval = backOffInterval * 2
+                                    log.info("Client $clientId failed to connect to ${config.mqtt.server}, increasing backOffInterval to ${backOffInterval}")
+                                    continuation.resume(Unit)
+                                    MqttMonitoringCounters.connectFailures.inc()
+                                    MqttMonitoringCounters.connectFailDuration.inc((now - connectStartTimestamp).toDouble())
+                                } else {
+                                    val now = System.currentTimeMillis()
+                                    backOffInterval = config.load.clientStepInterval
+                                    log.debug("Client $clientId connected to ${config.mqtt.server}")
+                                    continuation.resume(Unit)
+                                    MqttMonitoringCounters.connectSuccess.inc()
+                                    MqttMonitoringCounters.clientsConnectedCurrent.inc()
+                                    MqttMonitoringCounters.subscriptionsDisconnectedCurrent.dec(subscriptions.size.toDouble())
+                                    MqttMonitoringCounters.connectSuccessDuration.inc((now - connectStartTimestamp).toDouble())
+                                }
+                            })
+                        }
                     }
+                } catch (e: Exception) {
+                    log.error("Unhandled exception in client connection check loop", e)
                 }
                 delay(backOffInterval)
             }
