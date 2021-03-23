@@ -48,7 +48,7 @@ variable "mqtt_server" {
 }
 
 variable "mqtt_loadsim_version" {
-  default = "0.0.3"
+  default = "0.0.4"
 }
 
 variable "node_count" {
@@ -95,16 +95,7 @@ variable "keep_alive_seconds" {
   default = 180
 }
 
-
-###########################################
-#############     DockerHub   #############
-###########################################
-
-variable "dockerhub_username" {
-  type = string
-}
-
-variable "dockerhub_password" {
-  type = string
+variable "message_qos" {
+  default = 0
 }
 

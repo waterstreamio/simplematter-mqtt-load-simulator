@@ -160,12 +160,15 @@ class MqttLoadSimulator(private val vertx: Vertx, private val config: MqttLoadSi
                     DefaultExports.initialize()
                 val router = Router.router(vertx)
                 router.route(config.metricsEndpoint).handler(MetricsHandler())
+//                router.route(config.metricsEndpoint).handler({req ->
+//                    println("**** TODO return metrics")
+//                    req.response().end("all right!")
+//                })
                 val server = vertx.createHttpServer()
                 server.requestHandler(router).listen(config.port)
                 log.debug("Started monitoring on port ${config.port}")
             } else {
                 log.info("Monitoring port not configured, not exposing metrics")
-
             }
         }
     }

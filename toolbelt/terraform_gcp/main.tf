@@ -128,6 +128,7 @@ docker run -d  \
     -e MQTT_LOAD_KEEP_ALIVE_SECONDS=${var.keep_alive_seconds} \
     -e MQTT_LOAD_MONITORING_PORT=1884 \
     -e MQTT_LOAD_PERSISTENT_SESSION=${var.persistent_session} \
+    -e MQTT_LOAD_PUBLISH_QOS=${var.message_qos} \
     -p 1884:1884 \
     --name mqtt-load-simulator \
     simplematter/simplematter-mqtt-load-simulator:${var.mqtt_loadsim_version}
@@ -148,8 +149,6 @@ runcmd:
   - [curl, "http://metadata.google.internal/computeMetadata/v1/instance/attributes/run-mqtt-loadsim-sh", -H, "Metadata-Flavor: Google", -o, runMqttLoadsim.sh]
   - echo scripts download done >> mqttload_start.log
   - sleep 10
-  - sudo -u mqttload docker login -u ${var.dockerhub_username} -p ${var.dockerhub_password}
-  - echo docker login done >> mqttload_start.log
   - sudo -u mqttload sh runMqttLoadsim.sh
   - echo init done >>  mqttload_start.log
 EOF

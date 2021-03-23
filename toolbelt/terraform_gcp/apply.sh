@@ -6,3 +6,5 @@ terraform apply -target google_compute_instance_group_manager.mqtt_loadsim_group
 
 echo Applying remaining resources
 terraform apply --auto-approve
+
+date
