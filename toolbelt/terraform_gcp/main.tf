@@ -195,7 +195,7 @@ resource "google_compute_target_pool" "mqtt_loadsim" {
 resource "google_compute_instance_group_manager" "mqtt_loadsim_group" {
   name = "${var.simulation_name}-group-manager"
 
-  base_instance_name = "mqttd"
+  base_instance_name = "mqtt-load"
   zone = var.zone
 
   depends_on = [
@@ -264,8 +264,8 @@ resource "google_compute_instance_template" "mqtt-loadsim-monitoring" {
   }
 
   metadata = {
-    app = "mqttd-monitoring"
-    mqttd-grafana-dashboard-json = file("../monitoring/mqtt-load-simulator-dashboard.json")
+    app = "mqtt-load-monitoring"
+    mqtt-load-grafana-dashboard-json = file("../monitoring/mqtt-load-simulator-dashboard.json")
     prometheus-yaml = templatefile("prometheus.yaml.template", {
       targetsStr: join(",", [for x in data.google_compute_instance.mqtt_loadsim_nodes: format("'%s:%d'", x.network_interface.0.network_ip, 1884)])
     })
@@ -296,14 +296,14 @@ providers:
   # <bool> allow updating provisioned dashboards from the UI
   allowUiUpdates: true
   options:
-    path: /var/mqttd_monitoring_dashboards
+    path: /var/mqtt_load_monitoring_dashboards
 EOF
 
     run-grafana-sh = <<EOF
 #TODO provision anonymous organization for Grafana
 docker run -d -v /var/mqtt_load_monitoring/datasource.yaml:/etc/grafana/provisioning/datasources/datasource.yaml \
               -v /var/mqtt_load_monitoring/dashboard-provider.yaml:/etc/grafana/provisioning/dashboards/provider.yaml \
-              -v /var/mqtt_load_monitoring/dashboards:/var/mqttd_monitoring_dashboards \
+              -v /var/mqtt_load_monitoring/dashboards:/var/mqtt_load_monitoring_dashboards \
               --network monitoring --name grafana -p 3000:3000 \
               -e GF_SECURITY_ALLOW_EMBEDDING=true \
               -e GF_AUTH_ANONYMOUS_ENABLED=true \
@@ -327,7 +327,7 @@ runcmd:
   - [curl, "http://metadata.google.internal/computeMetadata/v1/instance/attributes/grafana-prometheus-datasource-yaml", -H, "Metadata-Flavor: Google", -o, datasource.yaml]
   - [curl, "http://metadata.google.internal/computeMetadata/v1/instance/attributes/grafana-dashboard-provider-yaml", -H, "Metadata-Flavor: Google", -o, dashboard-provider.yaml]
   - mkdir dashboards
-  - [curl, "http://metadata.google.internal/computeMetadata/v1/instance/attributes/mqttd-grafana-dashboard-json", -H, "Metadata-Flavor: Google", -o, dashboards/mqttd-grafana-dashboard.json]
+  - [curl, "http://metadata.google.internal/computeMetadata/v1/instance/attributes/mqtt-load-grafana-dashboard-json", -H, "Metadata-Flavor: Google", -o, dashboards/mqtt-load-grafana-dashboard.json]
   - echo starting prometheus >> start.log
   - docker network create monitoring
   - docker run -d -v /var/mqtt_load_monitoring/prometheus.yaml:/etc/prometheus/prometheus.yaml --network monitoring -p 9090:9090 --name prometheus prom/prometheus:v2.16.0 --config.file=/etc/prometheus/prometheus.yaml --web.listen-address 0.0.0.0:9090

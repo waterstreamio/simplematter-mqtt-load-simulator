@@ -553,6 +553,11 @@
           "expr": "sum(mqtt_load_disconnects_total)",
           "legendFormat": "Disconnects - total",
           "refId": "E"
+        },
+        {
+          "expr": "sum(mqtt_load_connect_aborts_total)",
+          "legendFormat": "Aborted connections",
+          "refId": "F"
         }
       ],
       "thresholds": [],
@@ -560,6 +565,96 @@
       "timeRegions": [],
       "timeShift": null,
       "title": "Connection Details",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 24
+      },
+      "id": 13,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "sum by(quantile)(mqtt_load_connect_success_latency)",
+          "legendFormat": "Success connection latency (q={{quantile}})",
+          "refId": "C"
+        },
+        {
+          "expr": "sum by(quantile)(mqtt_load_connect_fail_latency)",
+          "legendFormat": "Failed connection latency (q={{quantile}})",
+          "refId": "D"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Connect latency",
       "tooltip": {
         "shared": true,
         "sort": 0,
