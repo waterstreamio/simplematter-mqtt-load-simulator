@@ -51,9 +51,15 @@ class SimulatedClient(
     fun isStopped(): Boolean = stopped
 
     private val options = {
-        val o = MqttClientOptions().setClientId(clientId).setCleanSession(!config.load.persistentSession).setKeepAliveInterval(config.mqtt.keepAliveSeconds)
+        val o = MqttClientOptions()
+            .setClientId(clientId)
+            .setCleanSession(!config.load.persistentSession)
+            .setKeepAliveInterval(config.mqtt.keepAliveSeconds)
+            .setAutoKeepAlive(config.mqtt.autoKeepAlive)
+
         o.setReconnectAttempts(0)
-        o.setConnectTimeout(config.mqtt.connectionTimeoutSeconds * 1000)
+            .setConnectTimeout(config.mqtt.connectionTimeoutSeconds * 1000)
+
         o
     }()
 
@@ -121,6 +127,17 @@ class SimulatedClient(
     }
 
     private fun startActionLoop() {
+        if(!config.mqtt.autoKeepAlive) {
+            //automatic ping doesn't react on missing incoming messages
+            launch {
+                while (!stopping) {
+                    if (mqttClient.isConnected) {
+                        mqttClient.ping()
+                    }
+                    delay(config.mqtt.keepAliveSeconds * 1000L)
+                }
+            }
+        }
         launch {
             while (!stopping) {
                 val action = nextAction()

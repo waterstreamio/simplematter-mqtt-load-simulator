@@ -54,7 +54,8 @@ data class ClientActionProbabilitiesConfig(
 
 data class MqttConfig(val server: String,
                       val connectionTimeoutSeconds: Int,
-                      val keepAliveSeconds: Int) {
+                      val keepAliveSeconds: Int,
+                      val autoKeepAlive: Boolean = false) {
     val serverParsed: MqttServer by lazy {
         val parts = server.split(':', limit = 2)
         if (parts.size == 2)

@@ -19,6 +19,6 @@ docker push $DH_MQTT_LOAD_IMAGE:$MQTT_LOAD_VERSION
 docker push $DH_MQTT_LOAD_IMAGE:latest
 
 echo Push to $DH_MQTT_LOAD_IMAGE completed
-
+date
 
 
