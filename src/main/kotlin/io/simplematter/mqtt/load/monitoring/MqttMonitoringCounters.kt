@@ -2,6 +2,8 @@ package io.simplematter.mqtt.load.monitoring
 
 import io.prometheus.client.Counter
 import io.prometheus.client.Gauge
+import io.prometheus.client.Histogram
+import io.prometheus.client.Summary
 
 
 object MqttMonitoringCounters {
@@ -25,6 +27,8 @@ object MqttMonitoringCounters {
 
     val connectSuccess = Counter.build("mqtt_load_connect_success", "Number of successful connects").register()
 
+    val connectAborts = Counter.build("mqtt_load_connect_aborts", "Number of aborted connects").register()
+
     val connectFailures = Counter.build("mqtt_load_connect_failures", "Number of failed connects").register()
 
     val connectPending = Gauge.build("mqtt_load_connect_pending", "Number of pending connects").register()
@@ -35,5 +39,17 @@ object MqttMonitoringCounters {
 
     val connectSuccessDuration = Counter.build("mqtt_load_connect_success_duration", "Time spent waiting for successful connections").register()
 
+    val connectSuccessLatency = Summary.build("mqtt_load_connect_success_latency", "Time spent waiting for successful connections - summary")
+        .quantile(0.99, 0.001)
+        .quantile(0.90, 0.001)
+        .quantile(0.50, 0.001)
+        .register()
+
     val connectFailDuration = Counter.build("mqtt_load_connect_fail_duration", "Time spent waiting for failed connections").register()
+
+    val connectFailLatency = Summary.build("mqtt_load_connect_fail_latency", "Time spent waiting for failed connections - summary")
+        .quantile(0.99, 0.001)
+        .quantile(0.90, 0.001)
+        .quantile(0.50, 0.001)
+        .register()
 }
