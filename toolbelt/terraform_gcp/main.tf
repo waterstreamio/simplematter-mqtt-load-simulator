@@ -129,6 +129,7 @@ docker run -d  \
     -e MQTT_LOAD_MONITORING_PORT=1884 \
     -e MQTT_LOAD_PERSISTENT_SESSION=${var.persistent_session} \
     -e MQTT_LOAD_PUBLISH_QOS=${var.message_qos} \
+    -e MQTT_LOAD_JAVA_OPTS="-XX:InitialRAMPercentage=${var.loadsim_ram_percentage} -XX:MaxRAMPercentage=${var.loadsim_ram_percentage}" \
     -p 1884:1884 \
     --name mqtt-load-simulator \
     simplematter/simplematter-mqtt-load-simulator:${var.mqtt_loadsim_version}
