@@ -21,6 +21,12 @@ variable "preemptible_nodes" {
   default = "false"
 }
 
+variable "loadsim_ram_percentage" {
+  description = "JVM MaxRAMPercentage parameter value"
+  type        = string
+  default     = "75.0"
+}
+
 variable "simulation_name" {
   default = "mqtt-load"
 }
@@ -48,7 +54,7 @@ variable "mqtt_server" {
 }
 
 variable "mqtt_loadsim_version" {
-  default = "0.0.4"
+  default = "0.0.6"
 }
 
 variable "node_count" {

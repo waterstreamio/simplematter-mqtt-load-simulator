@@ -67,6 +67,8 @@ class SimulatedClient(
 
     private val subscriptions = mutableSetOf<String>()
 
+    private val publishQoS = MqttQoS.valueOf(config.load.publishQos)
+
     /**
      * Checks that mqttClient is connected. If not - tries to connect it
      */
@@ -176,7 +178,8 @@ class SimulatedClient(
 
     private fun sendRandomMessage() {
         val topic = topics.get(random.nextInt(topics.size))
-        mqttClient.publish(topic, Buffer.buffer(randomMessageBody()), MqttQoS.AT_MOST_ONCE, false, false)
+
+        mqttClient.publish(topic, Buffer.buffer(randomMessageBody()), publishQoS, false, false)
         log.debug("Sent random message from {} to {}", clientId, topic)
         MqttMonitoringCounters.publishSent.inc()
         stats.messageSent()

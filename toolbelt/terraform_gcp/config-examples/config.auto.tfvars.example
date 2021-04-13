@@ -10,7 +10,7 @@ zone =  "<YOUR-GCP-ZONE>"
 #############     MQTT Load   #############
 ###########################################
 
-mqtt_loadsim_version="0.0.4"
+mqtt_loadsim_version="0.0.6"
 
 mqtt_server = "<mqttd_host:mqttd_port>"
 
