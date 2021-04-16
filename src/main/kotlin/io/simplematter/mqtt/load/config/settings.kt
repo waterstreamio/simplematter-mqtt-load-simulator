@@ -20,8 +20,7 @@ data class MqttLoadSimulatorConfig(val load: LoadConfig,
 data class LoadConfig(
         val publishQos: Int,
         val subscribeQos: Int,
-        val clientsMinNumber: Int,
-        val clientsMaxNumber: Int,
+
         val clientsMaxSpawnAtOnce: Int,
         val clientPrefix: String,
         val randomizeClientPrefix: Boolean,
@@ -29,16 +28,34 @@ data class LoadConfig(
         val topicPrefix: String,
         val messageMinSize: Int,
         val messageMaxSize: Int,
+
         val simulationStepInterval: Long,
-        val clientActionProbabilities: ClientActionProbabilitiesConfig,
-        val clientStepInterval: Long,
         val statsInterval: Long,
         val rampUpSeconds: Int,
         val actionsDuringRampUp: Boolean,
-        val persistentSession: Boolean
+        val persistentSession: Boolean,
+
+        val publishingClients: PublishingClientsConfig,
+        val subscribingClients: SubscribingClientsConfig,
+        val randomizedClients: RandomizedClientsConfig
 ) {
     val rampUpMillis = rampUpSeconds * 1000L
 }
+
+data class PublishingClientsConfig(val clientsNumber: Int,
+                                   val messagesPerSecond: Double)
+
+data class SubscribingClientsConfig(val clientsNumber: Int,
+                                    val wildcardSubscriptionPerClient: Int,
+                                    val regularSubscriptionsPerClient: Int,
+                                    val delayBetweenSubscriptions: Long)
+
+data class RandomizedClientsConfig(val clientsMinNumber: Int,
+                                   val clientsMaxNumber: Int,
+                                   val clientActionProbabilities: ClientActionProbabilitiesConfig,
+                                   val clientStepInterval: Long,
+                                   val minSubscriptionsPerClient: Int,
+                                   val maxSubscriptionsPerClient: Int)
 
 data class ClientActionProbabilitiesConfig(
         val publish: Int,

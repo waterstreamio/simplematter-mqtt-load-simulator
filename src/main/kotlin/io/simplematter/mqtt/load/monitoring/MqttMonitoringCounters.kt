@@ -17,6 +17,17 @@ object MqttMonitoringCounters {
 
     val subscribeSent = Counter.build("mqtt_load_subscribe_sent", "Number of SUBSCRIBE messages sent to MQTT broker").register()
 
+    val subackReceived = Counter.build("mqtt_load_suback_received", "Number of SUBACK messages received from MQTT broker").register()
+
+    val subscribeLatency = Summary.build("mqtt_load_subscribe_latency", "Time spent waiting for SUBACK - summary")
+        .quantile(0.99, 0.001)
+        .quantile(0.90, 0.001)
+        .quantile(0.50, 0.001)
+        .register()
+
+
+    val subscribeFailed = Counter.build("mqtt_load_subscribe_failed", "Number of failed subscriptions").register()
+
     val unsubscribeSent = Counter.build("mqtt_load_unsubscribe_sent", "Number of UNSUBSCRIBE messages sent to MQTT broker").register()
 
     val subscriptionsCurrent = Gauge.build("mqtt_load_subscriptions_current", "Number of current subscriptions, for both connected and disconnected clients").register()

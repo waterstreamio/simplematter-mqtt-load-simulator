@@ -10,7 +10,7 @@
     <logger name="io.simplematter.mqtt.load" level="DEBUG"/>
 <!--    <logger name="io.simplematter.mqtt.load.MqttLoadSimulator" level="INFO"/>-->
     <logger name="io.simplematter.mqtt.load.MqttLoadSimulator" level="DEBUG"/>
-    <logger name="io.simplematter.mqtt.load.SimulatedClient" level="INFO"/>
+    <logger name="io.simplematter.mqtt.load.clients.RandomizedClient" level="INFO"/>
 
     <root level="INFO">
         <appender-ref ref="STDOUT" />

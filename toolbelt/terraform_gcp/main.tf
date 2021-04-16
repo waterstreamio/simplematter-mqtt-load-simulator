@@ -115,10 +115,10 @@ docker run -d  \
     -e MQTT_LOAD_TOPICS_NUMBER=${var.clients_per_node} \
     -e MQTT_LOAD_MESSAGE_MIN_SIZE=${var.message_min_size} \
     -e MQTT_LOAD_MESSAGE_MAX_SIZE=${var.message_max_size} \
-    -e MQTT_LOAD_CLIENT_PUBLISH_PROBABILITY=100 \
-    -e MQTT_LOAD_CLIENT_SUBSCRIBE_PROBABILITY=0 \
-    -e MQTT_LOAD_CLIENT_UNSUBSCRIBE_PROBABILITY=0 \
-    -e MQTT_LOAD_CLIENT_IDLE_PROBABILITY=0 \
+    -e MQTT_LOAD_CLIENT_PUBLISH_PROBABILITY=${var.mqtt_client_publish_probability} \
+    -e MQTT_LOAD_CLIENT_SUBSCRIBE_PROBABILITY=${var.mqtt_client_subscribe_probability} \
+    -e MQTT_LOAD_CLIENT_UNSUBSCRIBE_PROBABILITY=${var.mqtt_client_unsubscribe_probability} \
+    -e MQTT_LOAD_CLIENT_IDLE_PROBABILITY=${var.mqtt_client_idle_probability} \
     -e MQTT_LOAD_SIMULATION_STEP_INTERVAL=${var.simulation_step_interval_ms} \
     -e MQTT_LOAD_CLIENT_STEP_INTERVAL=${var.client_step_interval_ms} \
     -e MQTT_LOAD_STATS_INTERVAL=10000 \
@@ -128,7 +128,7 @@ docker run -d  \
     -e MQTT_LOAD_KEEP_ALIVE_SECONDS=${var.keep_alive_seconds} \
     -e MQTT_LOAD_MONITORING_PORT=1884 \
     -e MQTT_LOAD_PERSISTENT_SESSION=${var.persistent_session} \
-    -e MQTT_LOAD_PUBLISH_QOS=${var.message_qos} \
+    -e MQTT_LOAD_PUBLISH_QOS=${var.publish_qos} \
     -e MQTT_LOAD_JAVA_OPTS="-XX:InitialRAMPercentage=${var.loadsim_ram_percentage} -XX:MaxRAMPercentage=${var.loadsim_ram_percentage}" \
     -p 1884:1884 \
     --name mqtt-load-simulator \

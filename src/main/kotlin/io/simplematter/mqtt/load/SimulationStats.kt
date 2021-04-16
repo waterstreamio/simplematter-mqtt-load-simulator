@@ -1,14 +1,14 @@
 package io.simplematter.mqtt.load
 
+import io.simplematter.mqtt.load.clients.RandomizedClient
 import io.simplematter.mqtt.load.config.MqttLoadSimulatorConfig
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
 import java.util.concurrent.atomic.AtomicInteger
-import java.util.concurrent.atomic.AtomicLong
 
 
 class SimulationStats(parentJob: Job, config: MqttLoadSimulatorConfig): CoroutineScope {
-    private val log = LoggerFactory.getLogger(SimulatedClient::class.java)
+    private val log = LoggerFactory.getLogger(RandomizedClient::class.java)
 
     private val job by lazy {
         val j = Job(parentJob)

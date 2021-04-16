@@ -65,12 +65,40 @@ variable "clients_per_node" {
   default = 1000
 }
 
+variable "mqtt_topics_number" {
+  default = 1000
+}
+
 variable "message_min_size" {
   default = 300
 }
 
 variable "message_max_size" {
   default = 600
+}
+
+variable "mqtt_min_subscriptions_per_client" {
+  default = 0
+}
+
+variable "mqtt_max_subscriptions_per_client" {
+  default = 50
+}
+
+variable "mqtt_client_publish_probability" {
+  default = 100
+}
+
+variable "mqtt_client_subscribe_probability" {
+  default = 0
+}
+
+variable "mqtt_client_unsubscribe_probability" {
+  default = 0
+}
+
+variable "mqtt_client_idle_probability" {
+  default = 0
 }
 
 variable "ramp_up_seconds" {
@@ -101,7 +129,11 @@ variable "keep_alive_seconds" {
   default = 180
 }
 
-variable "message_qos" {
+variable "publish_qos" {
+  default = 0
+}
+
+variable "subscribe_qos" {
   default = 0
 }
 
