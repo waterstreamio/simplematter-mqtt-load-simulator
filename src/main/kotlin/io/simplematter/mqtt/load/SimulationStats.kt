@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger
 
 
 class SimulationStats(parentJob: Job, config: MqttLoadSimulatorConfig): CoroutineScope {
-    private val log = LoggerFactory.getLogger(RandomizedClient::class.java)
+    private val log = LoggerFactory.getLogger(SimulationStats::class.java)
 
     private val job by lazy {
         val j = Job(parentJob)

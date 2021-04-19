@@ -2,7 +2,10 @@ package io.simplematter.mqtt.load
 
 import io.prometheus.client.hotspot.DefaultExports
 import io.prometheus.client.vertx.MetricsHandler
+import io.simplematter.mqtt.load.clients.AbstractClient
+import io.simplematter.mqtt.load.clients.PublishingClient
 import io.simplematter.mqtt.load.clients.RandomizedClient
+import io.simplematter.mqtt.load.clients.SubscribingClient
 import io.simplematter.mqtt.load.config.MonitoringConfig
 import io.simplematter.mqtt.load.config.MqttLoadSimulatorConfig
 import io.vertx.core.Promise
@@ -27,8 +30,15 @@ class MqttLoadSimulator(private val vertx: Vertx, private val config: MqttLoadSi
 
     override val coroutineContext: CoroutineContext = Dispatchers.Default + job
 
-    private val topics: List<String> = (1..config.load.topicsNumber).map { i -> config.load.topicPrefix + i }
-    private var clients = listOf<RandomizedClient>()
+    private val topicGroupPatterns: List<String> = (1..config.load.topicGroupsNumber).map { g -> config.load.topicPrefix + "/" + g + "/#"}
+
+    private val topics: List<String> = (1..config.load.topicsNumber).map { t ->
+        val g = t % config.load.topicGroupsNumber
+        config.load.topicPrefix + "/" + g + "/" + t }
+
+    private var randomizedClients = listOf<RandomizedClient>()
+    private var publishingClients = listOf<PublishingClient>()
+    private var subscribingClients = listOf<SubscribingClient>()
 
     private val clientIndex = AtomicInteger(0)
 
@@ -41,36 +51,52 @@ class MqttLoadSimulator(private val vertx: Vertx, private val config: MqttLoadSi
     else
         config.load.clientPrefix
 
+    private val randomizedClientPrefix = clientPrefix + "rnd-"
+
+    private val publishingClientPrefix = clientPrefix + "pub-"
+
+    private val subscribingClientPrefix = clientPrefix + "sub-"
+
     suspend fun run() {
         val startTimestamp = System.currentTimeMillis()
-        val rampUpEnd = startTimestamp + config.load.rampUpMillis
 
         while (true) {
             val nextAction = nextClientsAction()
             val now = System.currentTimeMillis()
 
-            trimClients()
+            trimStoppedClients()
 
-            if (now < rampUpEnd)
-                rampUp(now - startTimestamp)
-            else if (clients.size < config.load.randomizedClients.clientsMinNumber ||
-                    (nextAction == ClientsAction.INCREASE && clients.size < config.load.randomizedClients.clientsMaxNumber))
-                spawnMoreClients()
-            else if (clients.size > config.load.randomizedClients.clientsMaxNumber ||
-                    nextAction == ClientsAction.DECREASE && clients.size > config.load.randomizedClients.clientsMinNumber)
-                closeSomeClients()
-            //TODO eliminate closed clients from the list
+            val rampUpComplete = rampUpCompletePromise.future().isComplete
 
-            if (now > rampUpEnd)
+            if(!rampUpComplete) {
+                val msSinceStart = now - startTimestamp
+                randomizedClients = randomizedClients +
+                    rampUp(msSinceStart, config.load.randomizedClients.clientsMinNumber, randomizedClients.size, "rnd", ::launchRandomizedClient )
+                publishingClients = publishingClients +
+                    rampUp(msSinceStart, config.load.publishingClients.clientsNumber, publishingClients.size, "pub", ::launchPublishingClient )
+                subscribingClients = subscribingClients +
+                    rampUp(msSinceStart, config.load.subscribingClients.clientsNumber, subscribingClients.size, "sub", ::launchSubscribingClient)
+            }
+            else if (randomizedClients.size < config.load.randomizedClients.clientsMinNumber ||
+                    (nextAction == ClientsAction.INCREASE && randomizedClients.size < config.load.randomizedClients.clientsMaxNumber))
+                spawnMoreRandomizedClients()
+            else if (randomizedClients.size > config.load.randomizedClients.clientsMaxNumber ||
+                    nextAction == ClientsAction.DECREASE && randomizedClients.size > config.load.randomizedClients.clientsMinNumber)
+                closeSomeRandomizedClients()
+
+            if(!rampUpComplete && randomizedClients.size >= config.load.randomizedClients.clientsMinNumber &&
+                        publishingClients.size >= config.load.publishingClients.clientsNumber &&
+                        subscribingClients.size >= config.load.subscribingClients.clientsNumber ) {
                 rampUpCompletePromise.tryComplete()
+            }
 
             delay(config.load.simulationStepInterval)
         }
     }
 
-    private fun trimClients() {
+    private fun trimStoppedClients() {
         var trimCount = 0
-        clients = clients.filter {
+        randomizedClients = randomizedClients.filter {
             if (it.isStopped()) {
                 trimCount += 1
                 false
@@ -81,10 +107,10 @@ class MqttLoadSimulator(private val vertx: Vertx, private val config: MqttLoadSi
         log.debug("Trimmed $trimCount clients")
     }
 
-    private fun closeSomeClients() {
-        val nClients = random.nextInt(clients.size - config.load.randomizedClients.clientsMinNumber) + 1
+    private fun closeSomeRandomizedClients() {
+        val nClients = random.nextInt(randomizedClients.size - config.load.randomizedClients.clientsMinNumber) + 1
         log.debug("Closing $nClients clients")
-        clients = clients.filterIndexed { i, client ->
+        randomizedClients = randomizedClients.filterIndexed { i, client ->
             if (i < nClients) {
                 client.stop()
                 simulationStats.clientsStopped(1)
@@ -98,32 +124,53 @@ class MqttLoadSimulator(private val vertx: Vertx, private val config: MqttLoadSi
         }
     }
 
-    private fun spawnMoreClients() {
-        val missingClients = Math.max(config.load.randomizedClients.clientsMinNumber - clients.size, 0)
-        val clientsCapacity = Math.min(config.load.clientsMaxSpawnAtOnce, Math.max(config.load.randomizedClients.clientsMaxNumber - clients.size, 0))
+    private fun spawnMoreRandomizedClients() {
+        val missingClients = Math.max(config.load.randomizedClients.clientsMinNumber - randomizedClients.size, 0)
+        val clientsCapacity = Math.min(config.load.clientsMaxSpawnAtOnce, Math.max(config.load.randomizedClients.clientsMaxNumber - randomizedClients.size, 0))
         val nClients = if (missingClients >= clientsCapacity)
             clientsCapacity
         else
             random.nextInt(missingClients, clientsCapacity) + 1
         log.debug("Spawning $nClients clients")
-        clients = clients + (0..nClients).map { launchClient() }
+        randomizedClients = randomizedClients + (0..nClients).map { launchRandomizedClient() }
     }
 
-    private fun rampUp(msSinceStart: Long) {
-        val expectedClients: Int = (msSinceStart * config.load.randomizedClients.clientsMinNumber / config.load.rampUpMillis).toInt()
-        val nClients = Math.max(expectedClients - clients.size, 0)
-        log.debug("Expected clients: $expectedClients, actual: ${clients.size}. Ramping up $nClients clients.")
-        clients = clients + (0..nClients).map { launchClient() }
+    private fun <C : AbstractClient> rampUp(
+        msSinceStart: Long,
+        targetClientsNumber: Int,
+        actualClientsNumber: Int,
+        clientType: String,
+        spawner: () -> C
+    ): List<C> {
+        val expectedClients: Int = (msSinceStart * targetClientsNumber / config.load.rampUpMillis).toInt()
+        val nRndClients = Math.max(expectedClients - actualClientsNumber, 0)
+        log.debug("Expected ${clientType} clients: $expectedClients, actual: ${actualClientsNumber}. Ramping up $nRndClients clients.")
+        return (0 until nRndClients).map { spawner() }
     }
 
-    private fun launchClient(): RandomizedClient {
-        val clientId = clientPrefix + clientIndex.incrementAndGet()
+    private fun launchRandomizedClient(): RandomizedClient {
+        val clientId = randomizedClientPrefix + clientIndex.incrementAndGet()
         val client = RandomizedClient(clientId, topics, simulationStats, config, vertx, job, rampUpCompletePromise.future())
         client.start()
         simulationStats.clientsStarted(1)
         return client
     }
 
+    private fun launchPublishingClient(): PublishingClient {
+        val clientId = publishingClientPrefix + clientIndex.incrementAndGet()
+        val client = PublishingClient(clientId, topics, simulationStats, config, vertx, job, rampUpCompletePromise.future())
+        client.start()
+        simulationStats.clientsStarted(1)
+        return client
+    }
+
+    private fun launchSubscribingClient(): SubscribingClient {
+        val clientId = subscribingClientPrefix + clientIndex.incrementAndGet()
+        val client = SubscribingClient(clientId, topics, topicGroupPatterns, simulationStats, config, vertx, job, rampUpCompletePromise.future())
+        client.start()
+        simulationStats.clientsStarted(1)
+        return client
+    }
 
     private fun nextClientsAction(): ClientsAction {
         val n = random.nextInt(10)

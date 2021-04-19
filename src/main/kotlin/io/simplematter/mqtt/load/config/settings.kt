@@ -24,6 +24,7 @@ data class LoadConfig(
         val clientsMaxSpawnAtOnce: Int,
         val clientPrefix: String,
         val randomizeClientPrefix: Boolean,
+        val topicGroupsNumber: Int,
         val topicsNumber: Int,
         val topicPrefix: String,
         val messageMinSize: Int,
@@ -71,6 +72,7 @@ data class ClientActionProbabilitiesConfig(
 
 data class MqttConfig(val server: String,
                       val connectionTimeoutSeconds: Int,
+                      val subscribeTimeoutSeconds: Int,
                       val keepAliveSeconds: Int,
                       val autoKeepAlive: Boolean = false) {
     val serverParsed: MqttServer by lazy {
