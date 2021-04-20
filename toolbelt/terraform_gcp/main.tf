@@ -116,7 +116,7 @@ docker run -d  \
     -e MQTT_LOAD_RANDOMIZED_CLIENTS_MIN_NUMBER=${var.randomized_clients_per_node} \
     -e MQTT_LOAD_RANDOMIZED_CLIENTS_MAX_NUMBER=${var.randomized_clients_per_node} \
     -e MQTT_LOAD_CLIENT_PREFIX=${var.simulation_name} \
-    -e MQTT_LOAD_TOPIC_PREFIX=${var.simulation_name}/ \
+    -e MQTT_LOAD_TOPIC_PREFIX=${var.simulation_name} \
     -e MQTT_LOAD_TOPIC_GROUPS_NUMBER=${var.mqtt_topic_groups_number} \
     -e MQTT_LOAD_TOPICS_NUMBER=${var.mqtt_topics_number} \
     -e MQTT_LOAD_MESSAGE_MIN_SIZE=${var.message_min_size} \

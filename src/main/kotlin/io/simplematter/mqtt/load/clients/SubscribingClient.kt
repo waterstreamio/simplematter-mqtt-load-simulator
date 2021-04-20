@@ -9,7 +9,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
-import kotlin.random.Random
 
 
 class SubscribingClient(
@@ -27,16 +26,15 @@ class SubscribingClient(
 
     private val regularSubscriptions = RandomUtils.pickRandomElements(topics, config.load.subscribingClients.regularSubscriptionsPerClient)
 
-    private val wildcardSubscriptions = RandomUtils.pickRandomElements(topics, config.load.subscribingClients.wildcardSubscriptionPerClient)
+    private val wildcardSubscriptions = RandomUtils.pickRandomElements(topicGroupPatterns, config.load.subscribingClients.wildcardSubscriptionPerClient)
 
     suspend private fun subscribeToPatterns(patterns: List<String>) {
         for(pattern in patterns) {
-            if (canDoActions()) {
-                subscribing.subscribe(pattern)
+            while(!canDoActions()) {
                 delay(config.load.subscribingClients.delayBetweenSubscriptions)
-            } else {
-                delay(config.load.randomizedClients.clientStepInterval)
             }
+            subscribing.subscribe(pattern)
+            delay(config.load.subscribingClients.delayBetweenSubscriptions)
         }
     }
 
@@ -54,6 +52,6 @@ class SubscribingClient(
     }
 
     companion object {
-        private val log = LoggerFactory.getLogger(MqttSubscribing::class.java)
+        private val log = LoggerFactory.getLogger(SubscribingClient::class.java)
     }
 }

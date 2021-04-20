@@ -63,13 +63,13 @@ class MqttLoadSimulator(private val vertx: Vertx, private val config: MqttLoadSi
         while (true) {
             val nextAction = nextClientsAction()
             val now = System.currentTimeMillis()
+            val msSinceStart = now - startTimestamp
 
             trimStoppedClients()
 
             val rampUpComplete = rampUpCompletePromise.future().isComplete
 
             if(!rampUpComplete) {
-                val msSinceStart = now - startTimestamp
                 randomizedClients = randomizedClients +
                     rampUp(msSinceStart, config.load.randomizedClients.clientsMinNumber, randomizedClients.size, "rnd", ::launchRandomizedClient )
                 publishingClients = publishingClients +
@@ -87,6 +87,7 @@ class MqttLoadSimulator(private val vertx: Vertx, private val config: MqttLoadSi
             if(!rampUpComplete && randomizedClients.size >= config.load.randomizedClients.clientsMinNumber &&
                         publishingClients.size >= config.load.publishingClients.clientsNumber &&
                         subscribingClients.size >= config.load.subscribingClients.clientsNumber ) {
+                log.info("Ramp up complete after ${msSinceStart} ms")
                 rampUpCompletePromise.tryComplete()
             }
 
