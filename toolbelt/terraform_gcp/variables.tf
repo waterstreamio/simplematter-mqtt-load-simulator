@@ -59,12 +59,21 @@ variable "mqtt_loadsim_version" {
 
 variable "node_count" {
   default = 3
+  type = number
 }
 
-variable "clients_per_node" {
+#Topic settings
+variable "mqtt_topic_groups_number" {
+  default = 10
+  type = number
+}
+
+variable "mqtt_topics_number" {
   default = 1000
+  type = number
 }
 
+#Message settings
 variable "message_min_size" {
   default = 300
 }
@@ -73,6 +82,74 @@ variable "message_max_size" {
   default = 600
 }
 
+
+#Publishing clients
+variable "publishing_clients_per_node" {
+  default = 1000
+  type = number
+}
+
+variable "publishing_client_messages_per_second" {
+  default = 0.1
+  type = number
+}
+
+#Subscribing clients
+variable "subscribing_clients_per_node" {
+  default = 0
+  type = number
+}
+
+variable "subscribing_client_wildcard_subscriptions" {
+  default = 1
+  type = number
+}
+
+variable "subscribing_client_regular_subscriptions" {
+  default = 1
+  type = number
+}
+
+variable "subscribing_client_delay_between_subscriptions" {
+  default = 1000
+  type = number
+}
+
+#Randomized clients
+variable "randomized_clients_per_node" {
+  default = 0
+  type = number
+}
+
+variable "randomized_client_min_subscriptions_per_client" {
+  default = 0
+}
+
+variable "randomized_client_max_subscriptions_per_client" {
+  default = 50
+}
+
+variable "randomized_client_publish_probability" {
+  default = 100
+}
+
+variable "randomized_client_subscribe_probability" {
+  default = 0
+}
+
+variable "randomized_client_unsubscribe_probability" {
+  default = 0
+}
+
+variable "randomized_client_idle_probability" {
+  default = 0
+}
+
+variable "randomized_client_step_interval_ms" {
+  default = 10000
+}
+
+#Further simulation settings
 variable "ramp_up_seconds" {
   default = 120
 }
@@ -89,10 +166,6 @@ variable "simulation_step_interval_ms" {
   default = 2000
 }
 
-variable "client_step_interval_ms" {
-  default = 10000
-}
-
 variable "connection_timeout_seconds" {
   default = 60
 }
@@ -101,7 +174,11 @@ variable "keep_alive_seconds" {
   default = 180
 }
 
-variable "message_qos" {
+variable "publish_qos" {
+  default = 0
+}
+
+variable "subscribe_qos" {
   default = 0
 }
 
