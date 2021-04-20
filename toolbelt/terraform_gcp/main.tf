@@ -108,19 +108,25 @@ resource "google_compute_instance_template" "mqtt-loadsim" {
     run-mqtt-loadsim-sh = <<EOF
 docker run -d  \
     -e MQTT_LOAD_SERVER=${var.mqtt_server} \
-    -e MQTT_LOAD_MIN_CLIENTS=${var.clients_per_node} \
-    -e MQTT_LOAD_MAX_CLIENTS=${var.clients_per_node} \
+    -e MQTT_LOAD_PUBLISHING_CLIENTS_NUMBER=${var.publishing_clients_per_node} \
+    -e MQTT_LOAD_PUBLISHING_CLIENTS_MESSAGES_PER_SECOND=${var.publishing_client_messages_per_second} \
+    -e MQTT_LOAD_SUBSCRIBING_CLIENTS_NUMBER=${var.subscribing_clients_per_node} \
+    -e MQTT_LOAD_SUBSCRIBING_CLIENTS_WILDCARD_SUBSCRIPTIONS=${var.subscribing_client_wildcard_subscriptions} \
+    -e MQTT_LOAD_SUBSCRIBING_CLIENTS_REGULAR_SUBSCRIPTIONS=${var.subscribing_client_regular_subscriptions} \
+    -e MQTT_LOAD_RANDOMIZED_CLIENTS_MIN_NUMBER=${var.randomized_clients_per_node} \
+    -e MQTT_LOAD_RANDOMIZED_CLIENTS_MAX_NUMBER=${var.randomized_clients_per_node} \
     -e MQTT_LOAD_CLIENT_PREFIX=${var.simulation_name} \
     -e MQTT_LOAD_TOPIC_PREFIX=${var.simulation_name}/ \
-    -e MQTT_LOAD_TOPICS_NUMBER=${var.clients_per_node} \
+    -e MQTT_LOAD_TOPIC_GROUPS_NUMBER=${var.mqtt_topic_groups_number} \
+    -e MQTT_LOAD_TOPICS_NUMBER=${var.mqtt_topics_number} \
     -e MQTT_LOAD_MESSAGE_MIN_SIZE=${var.message_min_size} \
     -e MQTT_LOAD_MESSAGE_MAX_SIZE=${var.message_max_size} \
-    -e MQTT_LOAD_CLIENT_PUBLISH_PROBABILITY=${var.mqtt_client_publish_probability} \
-    -e MQTT_LOAD_CLIENT_SUBSCRIBE_PROBABILITY=${var.mqtt_client_subscribe_probability} \
-    -e MQTT_LOAD_CLIENT_UNSUBSCRIBE_PROBABILITY=${var.mqtt_client_unsubscribe_probability} \
-    -e MQTT_LOAD_CLIENT_IDLE_PROBABILITY=${var.mqtt_client_idle_probability} \
+    -e MQTT_LOAD_RANDOMIZED_CLIENT_PUBLISH_PROBABILITY=${var.randomized_client_publish_probability} \
+    -e MQTT_LOAD_RANDOMIZED_CLIENT_SUBSCRIBE_PROBABILITY=${var.randomized_client_subscribe_probability} \
+    -e MQTT_LOAD_RANDOMIZED_CLIENT_UNSUBSCRIBE_PROBABILITY=${var.randomized_client_unsubscribe_probability} \
+    -e MQTT_LOAD_RANDOMIZED_CLIENT_IDLE_PROBABILITY=${var.randomized_client_idle_probability} \
+    -e MQTT_LOAD_RANDOMIZED_CLIENT_STEP_INTERVAL=${var.randomized_client_step_interval_ms} \
     -e MQTT_LOAD_SIMULATION_STEP_INTERVAL=${var.simulation_step_interval_ms} \
-    -e MQTT_LOAD_CLIENT_STEP_INTERVAL=${var.client_step_interval_ms} \
     -e MQTT_LOAD_STATS_INTERVAL=10000 \
     -e MQTT_LOAD_RAMP_UP_SECONDS=${var.ramp_up_seconds} \
     -e MQTT_LOAD_ACTIONS_DURING_RAMP_UP=${var.actions_during_ramp_up} \
@@ -129,6 +135,7 @@ docker run -d  \
     -e MQTT_LOAD_MONITORING_PORT=1884 \
     -e MQTT_LOAD_PERSISTENT_SESSION=${var.persistent_session} \
     -e MQTT_LOAD_PUBLISH_QOS=${var.publish_qos} \
+    -e MQTT_LOAD_SUBSCRIBE_QOS=${var.subscribe_qos} \
     -e MQTT_LOAD_JAVA_OPTS="-XX:InitialRAMPercentage=${var.loadsim_ram_percentage} -XX:MaxRAMPercentage=${var.loadsim_ram_percentage}" \
     -p 1884:1884 \
     --name mqtt-load-simulator \

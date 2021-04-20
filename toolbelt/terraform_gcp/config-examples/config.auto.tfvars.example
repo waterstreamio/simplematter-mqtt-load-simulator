@@ -14,17 +14,43 @@ mqtt_loadsim_version="0.0.6"
 
 mqtt_server = "<mqttd_host:mqttd_port>"
 
+node_type = "n1-standard-1"
 node_count = 3
-clients_per_node = 1000
+preemptible_nodes = false
 
-client_step_interval_ms = 10000
+#Publishing client
+publishing_clients_per_node = 20000
+publishing_client_messages_per_second = 0.1
+
+#Subscribing client
+subscribing_clients_per_node = 0
+subscribing_client_wildcard_subscriptions = 0
+subscribing_client_regular_subscriptions = 0
+subscribing_client_delay_between_subscriptions = 1000
+
+#Randomized client
+randomized_clients_per_node = 0
+
+randomized_client_publish_probability = 99
+randomized_client_subscribe_probability = 1
+randomized_client_unsubscribe_probability = 0
+randomized_client_idle_probability = 0
+
+randomized_client_min_subscriptions_per_client = 1
+randomized_client_max_subscriptions_per_client = 50
+
+randomized_client_step_interval_ms = 10000
+
+#Further settings
 ramp_up_seconds = 120
 
-message_min_size = 400
-message_max_size = 600
+message_min_size = 800
+message_max_size = 1200
 
 connection_timeout_seconds = 60
 keep_alive_seconds = 180
 
-preemptible_nodes = true
+publish_qos = 0
+subscribe_qos = 0
+
 persistent_session = false
