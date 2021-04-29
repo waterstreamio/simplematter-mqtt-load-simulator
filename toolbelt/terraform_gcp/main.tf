@@ -113,6 +113,9 @@ docker run -d  \
     -e MQTT_LOAD_SUBSCRIBING_CLIENTS_NUMBER=${var.subscribing_clients_per_node} \
     -e MQTT_LOAD_SUBSCRIBING_CLIENTS_WILDCARD_SUBSCRIPTIONS=${var.subscribing_client_wildcard_subscriptions} \
     -e MQTT_LOAD_SUBSCRIBING_CLIENTS_REGULAR_SUBSCRIPTIONS=${var.subscribing_client_regular_subscriptions} \
+    -e MQTT_LOAD_SUBSCRIBING_CLIENTS_INTERMITTENT_CLIENTS_NUMBER=${var.subscribing_client_intermittent_clients_per_node} \
+    -e MQTT_LOAD_SUBSCRIBING_CLIENTS_INTERMITTENT_CLIENTS_UPTIME_SECONDS=${var.subscribing_client_intermittent_clients_uptime_seconds} \
+    -e MQTT_LOAD_SUBSCRIBING_CLIENTS_INTERMITTENT_CLIENTS_DOWNTIME_SECONDS=${var.subscribing_client_intermittent_clients_downtime_seconds} \
     -e MQTT_LOAD_RANDOMIZED_CLIENTS_MIN_NUMBER=${var.randomized_clients_per_node} \
     -e MQTT_LOAD_RANDOMIZED_CLIENTS_MAX_NUMBER=${var.randomized_clients_per_node} \
     -e MQTT_LOAD_CLIENT_PREFIX=${var.simulation_name} \
@@ -132,6 +135,7 @@ docker run -d  \
     -e MQTT_LOAD_ACTIONS_DURING_RAMP_UP=${var.actions_during_ramp_up} \
     -e MQTT_LOAD_CONNECTION_TIMEOUT_SECONDS=${var.connection_timeout_seconds} \
     -e MQTT_LOAD_KEEP_ALIVE_SECONDS=${var.keep_alive_seconds} \
+    -e MQTT_LOAD_SUBSCRIBE_TIMEOUT_SECONDS=${var.subscribe_timeout_seconds} \
     -e MQTT_LOAD_MONITORING_PORT=1884 \
     -e MQTT_LOAD_PERSISTENT_SESSION=${var.persistent_session} \
     -e MQTT_LOAD_PUBLISH_QOS=${var.publish_qos} \

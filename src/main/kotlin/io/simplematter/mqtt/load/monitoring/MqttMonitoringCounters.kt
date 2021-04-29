@@ -9,6 +9,12 @@ import io.prometheus.client.Summary
 object MqttMonitoringCounters {
     val clientsCurrent = Gauge.build("mqtt_load_clients_current", "Number of currently spawned clients (both connected and not)").register()
 
+    val publishingClientsCurrent = Gauge.build("mqtt_load_publishing_clients_current", "Number of currently spawned publishing clients (both connected and not)").register()
+
+    val subscribingClientsCurrent = Gauge.build("mqtt_load_subscribing_clients_current", "Number of currently spawned subscribing clients (both connected and not)").register()
+
+    val randomizedClientsCurrent = Gauge.build("mqtt_load_randomized_clients_current", "Number of currently spawned randomized clients (both connected and not)").register()
+
     val clientsConnectedCurrent = Gauge.build("mqtt_load_clients_connected_current", "Number of currently connected clients").register()
 
     val publishSent = Counter.build("mqtt_load_publish_sent", "Number of PUBLISH messages sent to MQTT broker").register()

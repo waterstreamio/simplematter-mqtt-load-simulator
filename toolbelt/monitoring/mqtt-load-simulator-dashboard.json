@@ -173,6 +173,11 @@
           "expr": "sum(mqtt_load_subscriptions_disconnected_current)",
           "legendFormat": "Current subscriptions offline",
           "refId": "D"
+        },
+        {
+          "expr": "sum(mqtt_load_subscribe_failed_total)",
+          "legendFormat": "Subscribe failed",
+          "refId": "E"
         }
       ],
       "thresholds": [],
@@ -777,7 +782,7 @@
       }
     }
   ],
-  "refresh": false,
+  "refresh": "5s",
   "schemaVersion": 19,
   "style": "dark",
   "tags": [],
@@ -785,8 +790,8 @@
     "list": []
   },
   "time": {
-    "from": "2021-04-16T08:40:20.111Z",
-    "to": "2021-04-16T08:53:45.490Z"
+    "from": "now-3h",
+    "to": "now"
   },
   "timepicker": {
     "refresh_intervals": [

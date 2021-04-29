@@ -49,7 +49,10 @@ data class PublishingClientsConfig(val clientsNumber: Int,
 data class SubscribingClientsConfig(val clientsNumber: Int,
                                     val wildcardSubscriptionPerClient: Int,
                                     val regularSubscriptionsPerClient: Int,
-                                    val delayBetweenSubscriptions: Long)
+                                    val delayBetweenSubscriptions: Long,
+                                    val intermittentClientsNumber: Int,
+                                    val intermittentUptimeSeconds: Int,
+                                    val intermittentDowntimeSeconds: Int)
 
 data class RandomizedClientsConfig(val clientsMinNumber: Int,
                                    val clientsMaxNumber: Int,

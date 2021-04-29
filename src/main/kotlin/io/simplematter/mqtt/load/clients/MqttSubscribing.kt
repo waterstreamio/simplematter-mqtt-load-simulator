@@ -40,7 +40,7 @@ class MqttSubscribing(
             MqttMonitoringCounters.subscribeSent.inc()
             log.debug("Sent SUBSCRIBE {} to {}", clientId, pattern)
 
-            withTimeout(config.mqtt.connectionTimeoutSeconds * 10 * 1000L) {
+            withTimeout(config.mqtt.subscribeTimeoutSeconds * 1000L) {
                 do {
                     val suback = subacks.remove(packetId)
                     if (suback != null) {

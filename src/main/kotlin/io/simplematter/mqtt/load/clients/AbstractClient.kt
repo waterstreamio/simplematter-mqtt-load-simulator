@@ -51,12 +51,16 @@ abstract class AbstractClient(
 
     fun isStopped(): Boolean = stopped
 
+    @Volatile
+    protected var keepMqttClientDisconnected: Boolean = false
+
     private val options = {
         val o = MqttClientOptions()
             .setClientId(clientId)
             .setCleanSession(!config.load.persistentSession)
             .setKeepAliveInterval(config.mqtt.keepAliveSeconds)
             .setAutoKeepAlive(config.mqtt.autoKeepAlive)
+            .setMaxMessageSize(config.load.messageMaxSize + 100)
 
         o.setReconnectAttempts(0)
             .setConnectTimeout(config.mqtt.connectionTimeoutSeconds * 1000)
@@ -74,7 +78,7 @@ abstract class AbstractClient(
             var backOffInterval = config.load.randomizedClients.clientStepInterval
             while (!stopping) {
                 try {
-                    if (!mqttClient.isConnected) {
+                    if (!mqttClient.isConnected && !keepMqttClientDisconnected) {
                         log.info("Client $clientId not connected, trying to connect it to ${config.mqtt.server}...")
                         MqttMonitoringCounters.connectPending.inc()
                         suspendCancellableCoroutine<Unit> { continuation ->
