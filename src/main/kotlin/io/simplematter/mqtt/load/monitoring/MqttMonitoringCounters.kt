@@ -69,4 +69,11 @@ object MqttMonitoringCounters {
         .quantile(0.90, 0.001)
         .quantile(0.50, 0.001)
         .register()
+
+    val subscribingIntermittentConnectSuccessLatency = Summary.build("mqtt_load_subscribing_intermittent_connect_success_latency", "Time spent waiting for successful connections for subscribing intermittent clients - summary")
+        .quantile(0.99, 0.001)
+        .quantile(0.90, 0.001)
+        .quantile(0.50, 0.001)
+        .register()
+
 }

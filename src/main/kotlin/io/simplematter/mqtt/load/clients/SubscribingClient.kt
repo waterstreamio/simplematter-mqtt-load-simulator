@@ -68,15 +68,16 @@ class SubscribingClient(
                     if (mqttClient.isConnected) {
                         val uptime = System.currentTimeMillis() - connectTimestamp
                         if(uptime > config.load.subscribingClients.intermittentUptimeSeconds) {
-                            log.info("Start downtime for intermittent client $clientId")
+                            log.info("Start downtime for intermittent client $clientId after ${uptime} ms uptime")
                             disconnectTimestamp = System.currentTimeMillis()
                             keepMqttClientDisconnected = true
                             mqttClient.disconnect()
+                            MqttMonitoringCounters.disconnectsIntentional.inc()
                         }
                     } else {
                         val downtime = System.currentTimeMillis() - disconnectTimestamp
                         if(downtime > config.load.subscribingClients.intermittentDowntimeSeconds) {
-                            log.info("Stop downtime for intermittent client $clientId")
+                            log.info("Stop downtime for intermittent client $clientId after ${downtime} ms downtime")
                             keepMqttClientDisconnected = false
                             //let AbstractClient's connection check loop do the rest
                         }
@@ -87,9 +88,10 @@ class SubscribingClient(
         }
     }
 
-    override fun onClientConnect() {
-        super.onClientConnect()
+    override fun onClientConnect(latency: Long) {
+        super.onClientConnect(latency)
         connectTimestamp = System.currentTimeMillis()
+        MqttMonitoringCounters.subscribingIntermittentConnectSuccessLatency.observe(latency.toDouble())
     }
 
     companion object {

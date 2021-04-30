@@ -73,8 +73,8 @@ class RandomizedClient(
         startActionLoop()
     }
 
-    override fun onClientConnect() {
-        super.onClientConnect()
+    override fun onClientConnect(latency: Long) {
+        super.onClientConnect(latency)
         MqttMonitoringCounters.subscriptionsDisconnectedCurrent.dec(subscriptions.size.toDouble())
     }
 

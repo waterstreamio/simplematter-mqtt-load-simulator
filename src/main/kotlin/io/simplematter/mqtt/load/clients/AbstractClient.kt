@@ -99,23 +99,23 @@ abstract class AbstractClient(
                             }
                             mqttClient.connect(config.mqtt.serverParsed.port, config.mqtt.serverParsed.host, { result ->
                                 val now = System.currentTimeMillis()
-                                val latency = (now - connectStartTimestamp).toDouble()
+                                val latency = now - connectStartTimestamp
                                 if (result.failed()) {
                                     backOffInterval = backOffInterval * 2
                                     log.info("Client $clientId failed to connect to ${config.mqtt.server}, increasing backOffInterval to ${backOffInterval}")
                                     continuation.resume(Unit)
                                     MqttMonitoringCounters.connectFailures.inc()
-                                    MqttMonitoringCounters.connectFailLatency.observe(latency)
-                                    MqttMonitoringCounters.connectFailDuration.inc(latency)
+                                    MqttMonitoringCounters.connectFailLatency.observe(latency.toDouble())
+                                    MqttMonitoringCounters.connectFailDuration.inc(latency.toDouble())
                                 } else {
                                     backOffInterval = config.load.randomizedClients.clientStepInterval
                                     log.debug("Client $clientId connected to ${config.mqtt.server}")
                                     continuation.resume(Unit)
                                     MqttMonitoringCounters.connectSuccess.inc()
                                     MqttMonitoringCounters.clientsConnectedCurrent.inc()
-                                    MqttMonitoringCounters.connectSuccessLatency.observe(latency)
-                                    MqttMonitoringCounters.connectSuccessDuration.inc(latency)
-                                    onClientConnect()
+                                    MqttMonitoringCounters.connectSuccessLatency.observe(latency.toDouble())
+                                    MqttMonitoringCounters.connectSuccessDuration.inc(latency.toDouble())
+                                    onClientConnect(latency)
                                 }
                             })
                         }
@@ -129,7 +129,7 @@ abstract class AbstractClient(
         }
     }
 
-    protected open fun onClientConnect(): Unit {
+    protected open fun onClientConnect(latency: Long): Unit {
     }
 
     protected open fun onMqttClientClose(): Unit {
