@@ -26,6 +26,10 @@ class PublishingClient(
 
     override fun start() {
         super.start()
+        MqttMonitoringCounters.publishingClientsCurrent.inc()
+        job.invokeOnCompletion {
+            MqttMonitoringCounters.publishingClientsCurrent.dec()
+        }
 
         val msBetweenMessages: Long = (1000.0 / config.load.publishingClients.messagesPerSecond).toLong()
 

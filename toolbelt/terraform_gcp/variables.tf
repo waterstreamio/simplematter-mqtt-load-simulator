@@ -115,6 +115,21 @@ variable "subscribing_client_delay_between_subscriptions" {
   type = number
 }
 
+variable "subscribing_client_intermittent_clients_per_node" {
+  default = 0
+  type = number
+}
+
+variable "subscribing_client_intermittent_clients_uptime_seconds" {
+  default = 0
+  type = number
+}
+
+variable "subscribing_client_intermittent_clients_downtime_seconds" {
+  default = 0
+  type = number
+}
+
 #Randomized clients
 variable "randomized_clients_per_node" {
   default = 0
@@ -168,6 +183,10 @@ variable "simulation_step_interval_ms" {
 
 variable "connection_timeout_seconds" {
   default = 60
+}
+
+variable "subscribe_timeout_seconds" {
+  default = 600
 }
 
 variable "keep_alive_seconds" {

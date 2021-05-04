@@ -38,6 +38,7 @@ class MqttLoadSimulator(private val vertx: Vertx, private val config: MqttLoadSi
 
     private var randomizedClients = listOf<RandomizedClient>()
     private var publishingClients = listOf<PublishingClient>()
+    @Volatile
     private var subscribingClients = listOf<SubscribingClient>()
 
     private val clientIndex = AtomicInteger(0)
@@ -56,6 +57,10 @@ class MqttLoadSimulator(private val vertx: Vertx, private val config: MqttLoadSi
     private val publishingClientPrefix = clientPrefix + "pub-"
 
     private val subscribingClientPrefix = clientPrefix + "sub-"
+
+    private val subscribingIntermittentClientPrefix = clientPrefix + "sub-int-"
+
+    private val subscribingClientsCreated = AtomicInteger()
 
     suspend fun run() {
         val startTimestamp = System.currentTimeMillis()
@@ -143,7 +148,7 @@ class MqttLoadSimulator(private val vertx: Vertx, private val config: MqttLoadSi
         clientType: String,
         spawner: () -> C
     ): List<C> {
-        val expectedClients: Int = (msSinceStart * targetClientsNumber / config.load.rampUpMillis).toInt()
+        val expectedClients: Int = Math.max((msSinceStart * targetClientsNumber / config.load.rampUpMillis).toInt(), targetClientsNumber)
         val nRndClients = Math.max(expectedClients - actualClientsNumber, 0)
         log.debug("Expected ${clientType} clients: $expectedClients, actual: ${actualClientsNumber}. Ramping up $nRndClients clients.")
         return (0 until nRndClients).map { spawner() }
@@ -166,8 +171,15 @@ class MqttLoadSimulator(private val vertx: Vertx, private val config: MqttLoadSi
     }
 
     private fun launchSubscribingClient(): SubscribingClient {
-        val clientId = subscribingClientPrefix + clientIndex.incrementAndGet()
-        val client = SubscribingClient(clientId, topics, topicGroupPatterns, simulationStats, config, vertx, job, rampUpCompletePromise.future())
+        val index = clientIndex.incrementAndGet()
+        val intermittent = subscribingClientsCreated.incrementAndGet() < config.load.subscribingClients.intermittentClientsNumber
+        val clientId = if(intermittent) {
+            subscribingIntermittentClientPrefix + index
+        } else {
+            subscribingClientPrefix + index
+        }
+        log.info("***** launching subclient ${clientId}, subscribing clients count=${subscribingClientsCreated.get()}, maxIntermittent=${config.load.subscribingClients.intermittentClientsNumber}, intermittent=$intermittent")
+        val client = SubscribingClient(clientId, intermittent, topics, topicGroupPatterns, simulationStats, config, vertx, job, rampUpCompletePromise.future())
         client.start()
         simulationStats.clientsStarted(1)
         return client

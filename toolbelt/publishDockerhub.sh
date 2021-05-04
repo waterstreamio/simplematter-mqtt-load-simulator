@@ -14,9 +14,9 @@ DH_MQTT_LOAD_IMAGE=simplematter/simplematter-mqtt-load-simulator
 echo Pushing to $DH_MQTT_LOAD_IMAGE tags "$MQTT_LOAD_VERSION" and "latest"
 
 docker tag $LOCAL_MQTT_LOAD_IMAGE:$MQTT_LOAD_VERSION $DH_MQTT_LOAD_IMAGE:$MQTT_LOAD_VERSION
-docker tag $LOCAL_MQTT_LOAD_IMAGE:latest $DH_MQTT_LOAD_IMAGE:latest
+#docker tag $LOCAL_MQTT_LOAD_IMAGE:latest $DH_MQTT_LOAD_IMAGE:latest
 docker push $DH_MQTT_LOAD_IMAGE:$MQTT_LOAD_VERSION
-docker push $DH_MQTT_LOAD_IMAGE:latest
+#docker push $DH_MQTT_LOAD_IMAGE:latest
 
 echo Push to $DH_MQTT_LOAD_IMAGE completed
 date

@@ -2,17 +2,20 @@ package io.simplematter.mqtt.load.clients
 
 import io.simplematter.mqtt.load.SimulationStats
 import io.simplematter.mqtt.load.config.MqttLoadSimulatorConfig
+import io.simplematter.mqtt.load.monitoring.MqttMonitoringCounters
 import io.simplematter.mqtt.load.utils.RandomUtils
 import io.vertx.core.Future
 import io.vertx.core.Vertx
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
 
 
 class SubscribingClient(
     private val clientId: String,
+    private val intermittent: Boolean,
     private val topics: List<String>,
     private val topicGroupPatterns: List<String>,
     private val stats: SimulationStats,
@@ -28,6 +31,9 @@ class SubscribingClient(
 
     private val wildcardSubscriptions = RandomUtils.pickRandomElements(topicGroupPatterns, config.load.subscribingClients.wildcardSubscriptionPerClient)
 
+    private var connectTimestamp: Long = 0
+    private var disconnectTimestamp: Long = 0
+
     suspend private fun subscribeToPatterns(patterns: List<String>) {
         for(pattern in patterns) {
             while(!canDoActions()) {
@@ -38,8 +44,14 @@ class SubscribingClient(
         }
     }
 
+
     override fun start() {
         super.start()
+
+        MqttMonitoringCounters.subscribingClientsCurrent.inc()
+        job.invokeOnCompletion {
+            MqttMonitoringCounters.subscribingClientsCurrent.dec()
+        }
 
         subscribing.attachMqttHandlers()
 
@@ -49,6 +61,37 @@ class SubscribingClient(
             subscribeToPatterns(wildcardSubscriptions)
             log.info("Client {} finished {} wildcard subscriptions", clientId, wildcardSubscriptions.size)
         }
+
+        if(intermittent) {
+            launch {
+                while (!isStopping()) {
+                    if (mqttClient.isConnected) {
+                        val uptime = System.currentTimeMillis() - connectTimestamp
+                        if(uptime > config.load.subscribingClients.intermittentUptimeSeconds * 1000L) {
+                            log.info("Start downtime for intermittent client $clientId after ${uptime} ms uptime")
+                            disconnectTimestamp = System.currentTimeMillis()
+                            keepMqttClientDisconnected = true
+                            mqttClient.disconnect()
+                            MqttMonitoringCounters.disconnectsIntentional.inc()
+                        }
+                    } else {
+                        val downtime = System.currentTimeMillis() - disconnectTimestamp
+                        if(downtime > config.load.subscribingClients.intermittentDowntimeSeconds * 1000L) {
+                            log.info("Stop downtime for intermittent client $clientId after ${downtime} ms downtime")
+                            keepMqttClientDisconnected = false
+                            //let AbstractClient's connection check loop do the rest
+                        }
+                    }
+                    delay(config.load.simulationStepInterval)
+                }
+            }
+        }
+    }
+
+    override fun onClientConnect(latency: Long) {
+        super.onClientConnect(latency)
+        connectTimestamp = System.currentTimeMillis()
+        MqttMonitoringCounters.subscribingIntermittentConnectSuccessLatency.observe(latency.toDouble())
     }
 
     companion object {

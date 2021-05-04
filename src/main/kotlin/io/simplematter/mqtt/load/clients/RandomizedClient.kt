@@ -64,12 +64,17 @@ class RandomizedClient(
     override fun start() {
         super.start()
 
+        MqttMonitoringCounters.randomizedClientsCurrent.inc()
+        job.invokeOnCompletion {
+            MqttMonitoringCounters.randomizedClientsCurrent.dec()
+        }
+
         subscribing.attachMqttHandlers()
         startActionLoop()
     }
 
-    override fun onClientConnect() {
-        super.onClientConnect()
+    override fun onClientConnect(latency: Long) {
+        super.onClientConnect(latency)
         MqttMonitoringCounters.subscriptionsDisconnectedCurrent.dec(subscriptions.size.toDouble())
     }
 
