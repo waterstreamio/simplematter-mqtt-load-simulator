@@ -10,7 +10,7 @@ zone =  "<YOUR-GCP-ZONE>"
 #############     MQTT Load   #############
 ###########################################
 
-mqtt_loadsim_version="0.0.6"
+mqtt_loadsim_version="0.0.9"
 
 mqtt_server = "<mqttd_host:mqttd_port>"
 
@@ -27,6 +27,11 @@ subscribing_clients_per_node = 0
 subscribing_client_wildcard_subscriptions = 0
 subscribing_client_regular_subscriptions = 0
 subscribing_client_delay_between_subscriptions = 1000
+
+subscribing_client_intermittent_clients_per_node = 0
+subscribing_client_intermittent_clients_uptime_seconds = 180
+subscribing_client_intermittent_clients_downtime_seconds = 30
+
 
 #Randomized client
 randomized_clients_per_node = 0

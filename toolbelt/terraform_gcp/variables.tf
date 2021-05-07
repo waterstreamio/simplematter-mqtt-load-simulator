@@ -101,17 +101,17 @@ variable "subscribing_clients_per_node" {
 }
 
 variable "subscribing_client_wildcard_subscriptions" {
-  default = 1
+  default = 0
   type = number
 }
 
 variable "subscribing_client_regular_subscriptions" {
-  default = 1
+  default = 0
   type = number
 }
 
 variable "subscribing_client_delay_between_subscriptions" {
-  default = 1000
+  default = 10
   type = number
 }
 
