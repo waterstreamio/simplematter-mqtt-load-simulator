@@ -137,7 +137,8 @@ abstract class AbstractClient(
 
     protected fun startPingLoopIfNeeded() {
         if (!config.mqtt.autoKeepAlive) {
-            //automatic ping doesn't react on missing incoming messages
+            //automatic ping doesn't react on missing incoming messages.
+            //With QoS0-only publishing this may leave broken connections undetected for quite a while
             launch {
                 while (!stopping) {
                     if (mqttClient.isConnected) {

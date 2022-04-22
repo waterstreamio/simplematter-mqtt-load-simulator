@@ -8,7 +8,7 @@ val junit5Version by extra("5.4.0")
 val prometheusClientVersion by extra("0.10.0")
 
 plugins {
-    id("org.jetbrains.kotlin.jvm").version("1.3.70")
+    id("org.jetbrains.kotlin.jvm").version("1.5.30")
     id("com.github.johnrengelman.shadow").version("4.0.4")
     id("net.researchgate.release").version("2.8.1")
     application
@@ -104,3 +104,18 @@ release {
     buildTasks = listOf("shadowJar")
 }
 
+tasks.compileKotlin {
+    sourceCompatibility = "1.8"
+    targetCompatibility = "1.8"
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+
+tasks.compileTestKotlin {
+    sourceCompatibility = "1.8"
+    targetCompatibility = "1.8"
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
