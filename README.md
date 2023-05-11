@@ -72,3 +72,4 @@ cp config.sh example config.sh
 2. Customize config file with MQTT broker location and desired load settings
 3. Run the load simulator with `toolbelt/k8s/apply.sh`
 4. When done - run `toolbelt/k8s/undeploy.sh` to stop it.
+
